@@ -1,0 +1,4 @@
+id,estudiante,materia,fecha,estado,observacion
+1,20261001,Criptografía,2026-01-15,Pendiente,Solicita revisión de examen final
+2,20261002,Seguridad de Redes,2026-01-20,Aprobada,Ajuste aplicado
+3,20261003,Programación Web,2026-01-22,Rechazada,No procede revisión

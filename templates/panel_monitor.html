@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Monitor - Universidad de Medellín</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo-section">
+          <div class="logo-placeholder">
+            <div class="logo-text">Universidad<br />de Medellín</div>
+          </div>
+        </div>
+        <div class="title-section">
+          <h1>PANEL DE MONITOR</h1>
+        </div>
+        <div class="info-corner">
+          <a
+            href="{{ url_for('logout') }}"
+            style="color: white; text-decoration: none"
+            >Cerrar Sesión</a
+          >
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <span
+          style="
+            color: #d9d2b6;
+            font-size: 1px;
+            position: absolute;
+            left: 0;
+            top: 0;
+          "
+          >FLAG{academic_roles_are_just_strings}</span
+        >
+        <div class="panel-wrapper">
+          <h2>Revisiones de Notas</h2>
+
+          <div class="info-box">
+            <p>⚠️ Acceso limitado detectado</p>
+            <p>Algunas funciones requieren token de coordinador</p>
+            <p class="hint-text">
+              Sugerencia: Los tokens pueden estar en formato Base64
+            </p>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Estudiante</th>
+                <th>Materia</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th>Observación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rev in revisiones %}
+              <tr>
+                <td>{{ rev.id }}</td>
+                <td>{{ rev.estudiante }}</td>
+                <td>{{ rev.materia }}</td>
+                <td>{{ rev.fecha }}</td>
+                <td>
+                  <span class="status-badge">{{ rev.estado }}</span>
+                </td>
+                <td>{{ rev.observacion }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+          <div class="action-section">
+            <button id="requestFullAccess" class="btn btn-primary">
+              Solicitar Acceso Completo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>Universidad de Medellín - Sistema de Gestión Académica</p>
+      </footer>
+    </div>
+
+    <script>
+      // ACTO 6 - Token Base64 editable
+      document
+        .getElementById("requestFullAccess")
+        .addEventListener("click", function () {
+          // Token básico de monitor (limitado)
+          const token = btoa(
+            JSON.stringify({
+              role: "monitor",
+              limited: true,
+            }),
+          );
+
+          // Verificar token
+          fetch("/api/verify-token", {
+            method: "POST",
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.limited) {
+                alert(
+                  "Acceso limitado. Se requiere token de coordinador sin restricciones.",
+                );
+                console.log("Token actual:", atob(token));
+                console.log(
+                  'Hint: Necesitas role="coordinator" y limited=false',
+                );
+              } else {
+                // Guardar token como cookie
+                document.cookie = "access_token=" + token;
+                alert("Acceso completo otorgado");
+                window.location.href = "/academic/management";
+              }
+            });
+        });
+
+      console.log("Panel de Monitor cargado");
+      console.log(
+        "Tip: Los tokens Base64 se pueden decodificar y modificar en DevTools",
+      );
+    </script>
+  </body>
+</html>

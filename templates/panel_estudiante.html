@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Estudiante - Universidad de Medellín</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo-placeholder">
+                    <div class="logo-text">Universidad<br>de Medellín</div>
+                </div>
+            </div>
+            <div class="title-section">
+                <h1>PANEL DEL ESTUDIANTE</h1>
+            </div>
+            <div class="info-corner">
+                <a href="{{ url_for('logout') }}" style="color: white; text-decoration: none;">Cerrar Sesión</a>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="panel-wrapper">
+                <!-- Perfil del estudiante -->
+                <div class="profile-section">
+                    <h2>Perfil del Estudiante</h2>
+                    <div class="profile-card">
+                        <img src="{{ url_for('get_profile_image', filename='profile_card.png') }}" 
+                             alt="Carnet Universitario" 
+                             class="profile-image"
+                             title="Si tu foto se ve extraña, repórtala">
+                        <p class="profile-hint">Si tu foto se ve extraña, repórtala al sistema</p>
+                        <p><strong>ID:</strong> {{ user_id }}</p>
+                    </div>
+                </div>
+
+                <!-- Notas -->
+                <div class="grades-section">
+                    <h2>Mis Notas</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Materia</th>
+                                <th>Nota</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nota in notas %}
+                            <tr>
+                                <td>{{ nota.materia }}</td>
+                                <td>{{ nota.nota }}</td>
+                                <td>
+                                    <span class="status-badge {{ 'status-warning' if nota.estado == 'Pendiente' else 'status-success' }}">
+                                        {{ nota.estado }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if nota.nota|float < 3.0 %}
+                                    <button class="btn-revision" 
+                                            data-student="{{ user_id }}" 
+                                            data-subject="{{ nota.materia }}"
+                                            disabled>
+                                        Solicitar Revisión
+                                    </button>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Estado Financiero -->
+                {% if deuda %}
+                <div class="finance-section">
+                    <h2>Estado Financiero</h2>
+                    <div class="finance-card">
+                        <p><strong>Concepto:</strong> {{ deuda.concepto }}</p>
+                        <p><strong>Saldo:</strong> ${{ "{:,}".format(deuda.monto|int) }}</p>
+                        {% if deuda.monto|int > 0 %}
+                        <p class="warning-text">⚠️ Tienes deudas pendientes</p>
+                        {% else %}
+                        <p class="success-text">✓ Sin deudas</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Universidad de Medellín - Teléfono (604)3405555 - Mercedeo sur # 87 30 - Medellín - Colombia</p>
+        </footer>
+    </div>
+
+    <script>
+        // ACTO 4 - Validación solo en cliente (vulnerable)
+        document.querySelectorAll('.btn-revision').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const studentId = this.dataset.student;
+                const subject = this.dataset.subject;
+                
+                // Llamada directa al endpoint sin más validación
+                fetch('/api/grades/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        student_id: studentId,
+                        subject: subject,
+                        grade: 5.0
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert('Solicitud procesada: ' + data.message);
+                    if(data.success) {
+                        location.reload();
+                    }
+                });
+            });
+        });
+
+        // Nota para el curioso
+        console.log('Nota: Los botones deshabilitados se pueden habilitar desde DevTools');
+        console.log('También puedes revisar el código fuente de esta página');
+    </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión Académica - Universidad de Medellín</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo-section">
+                <div class="logo-placeholder">
+                    <div class="logo-text">Universidad<br>de Medellín</div>
+                </div>
+            </div>
+            <div class="title-section">
+                <h1>GESTIÓN ACADÉMICA - COORDINACIÓN</h1>
+            </div>
+            <div class="info-corner">
+                <a href="{{ url_for('logout') }}" style="color: white; text-decoration: none;">Cerrar Sesión</a>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="panel-wrapper">
+                <h2>Panel de Coordinación Académica</h2>
+                
+                <div class="success-box">
+                    <p>✓ Acceso completo habilitado</p>
+                    <p>Todas las funciones administrativas están disponibles</p>
+                </div>
+
+                <!-- Gestión de Notas -->
+                <div class="admin-section">
+                    <h3>Gestión de Notas y Estados</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Estudiante</th>
+                                <th>Materia</th>
+                                <th>Nota</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nota in notas %}
+                            <tr>
+                                <td>{{ nota.estudiante_id }}</td>
+                                <td>{{ nota.materia }}</td>
+                                <td>{{ nota.nota }}</td>
+                                <td>{{ nota.estado }}</td>
+                                <td>
+                                    <button class="btn-sm btn-warning" 
+                                            onclick="cambiarEstado('{{ nota.estudiante_id }}', '{{ nota.materia }}')">
+                                        Aprobar Materia
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Gestión Financiera -->
+                <div class="admin-section">
+                    <h3>Estado Financiero de Estudiantes</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Estudiante</th>
+                                <th>Deuda</th>
+                                <th>Concepto</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for deuda in deudas %}
+                            <tr>
+                                <td>{{ deuda.estudiante_id }}</td>
+                                <td>${{ "{:,}".format(deuda.monto|int) }}</td>
+                                <td>{{ deuda.concepto }}</td>
+                                <td>
+                                    <button class="btn-sm btn-danger" 
+                                            onclick="ajustarDeuda('{{ deuda.estudiante_id }}')">
+                                        Ajustar Deuda
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Universidad de Medellín - Sistema de Gestión Académica - Módulo Administrativo</p>
+        </footer>
+    </div>
+
+    <script>
+        // ACTO 7 - Modificación de estado académico
+        function cambiarEstado(studentId, subject) {
+            if(confirm('¿Deseas aprobar esta materia para el estudiante ' + studentId + '?')) {
+                fetch('/api/academic/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        student_id: studentId,
+                        subject: subject,
+                        status: 'Aprobado'
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    if(data.success) location.reload();
+                });
+            }
+        }
+
+        // ACTO FINAL - Eliminación de deudas
+        function ajustarDeuda(studentId) {
+            const nuevoMonto = prompt('Ingresa el nuevo monto de deuda (0 para eliminar):');
+            if(nuevoMonto !== null) {
+                fetch('/api/finance/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        student_id: studentId,
+                        debt: parseInt(nuevoMonto)
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    if(data.success) {
+                        location.reload();
+                    }
+                });
+            }
+        }
+
+        console.log('Panel de Coordinación cargado');
+        console.log('Advertencia: Todos los cambios se aplican sin confirmación adicional');
+    </script>
+</body>
+</html>
