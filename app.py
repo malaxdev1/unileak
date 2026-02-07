@@ -273,38 +273,41 @@ ALL_FLAGS = [
 ]
 VAULT_HASH = hashlib.sha1('\n'.join(sorted(ALL_FLAGS)).encode()).hexdigest()
 
+# Ruta de la bóveda: alfanumérico largo para que no se pueda adivinar (solo quien tenga la pista en metadatos la conoce)
+BOVEDA_PATH = 'Kp9xL2mN7qR4sT6vW8yZ1bC3dF5gH0jM2nP4rS6uV8wX0zA2'
+
 # Página tras eliminar deuda: narrativa + foto del profesor (metadatos con ruta y flag)
 @app.route('/el-secreto-del-profesor')
 def secreto_profesor():
     return render_template('secreto_profesor.html')
 
-# Bóveda final: introducir SHA1 de las 8 flags en orden alfabético
-@app.route('/boveda', methods=['GET', 'POST'])
+# Bóveda final: introducir SHA1 de las 8 flags en orden alfabético (siempre pide el hash, no se guarda estado)
+@app.route('/' + BOVEDA_PATH + '/boveda', methods=['GET', 'POST'])
 def boveda():
+    unlocked = False
+    youtube_regalo = '#'
     if request.method == 'POST':
         hash_ingresado = (request.form.get('hash') or request.form.get('sha1') or '').strip().lower()
         if hash_ingresado == VAULT_HASH:
-            session['vault_unlocked'] = True
+            # Solo en esta respuesta mostramos celebración; no guardamos en sesión
+            unlocked = True
+            YOUTUBE_REGALOS = [
+                'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                'https://www.youtube.com/watch?v=EH3nK85MAIU',
+                'https://www.youtube.com/watch?v=JlqW11vHLtw',
+                'https://youtu.be/PNkhLZlsYjQ?si=jBnoxFNAcjBtiLpx',
+                'https://youtu.be/jNhgozo9QJY?si=IZOMfUU5ik1vwo33',
+                'https://www.youtube.com/watch?v=N5lTRsuUT5o',
+                'https://www.youtube.com/watch?v=h69VanYG0Ds',
+                'https://youtu.be/FQAcHm7-SoE?si=sJpPWuhufgPslFPG',
+                'https://www.youtube.com/watch?v=AXp7ydbqTrw',
+                'https://www.youtube.com/watch?v=tjiN9IYFutU',
+                'https://www.youtube.com/watch?v=RUorAzaDftg'
+            ]
+            youtube_regalo = random.choice(YOUTUBE_REGALOS) if YOUTUBE_REGALOS else '#'
+        else:
+            flash('Hash incorrecto. Verifica que hayas usado las 8 flags en orden alfabético y el SHA1.', 'error')
             return redirect(url_for('boveda'))
-        flash('Hash incorrecto. Verifica que hayas usado las 8 flags en orden alfabético y el SHA1.', 'error')
-        return redirect(url_for('boveda'))
-    unlocked = session.get('vault_unlocked', False)
-    # Lista de enlaces de YouTube para el regalo; el botón elige uno al azar
-    YOUTUBE_REGALOS = [
-        'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        'https://www.youtube.com/watch?v=EH3nK85MAIU',
-        'https://www.youtube.com/watch?v=JlqW11vHLtw',
-        'https://youtu.be/PNkhLZlsYjQ?si=jBnoxFNAcjBtiLpx',
-        'https://youtu.be/jNhgozo9QJY?si=IZOMfUU5ik1vwo33',
-        'https://www.youtube.com/watch?v=N5lTRsuUT5o',
-        'https://www.youtube.com/watch?v=h69VanYG0Ds',
-        'https://youtu.be/FQAcHm7-SoE?si=sJpPWuhufgPslFPG',
-        'https://www.youtube.com/watch?v=AXp7ydbqTrw',
-        'https://www.youtube.com/watch?v=tjiN9IYFutU',
-        'https://www.youtube.com/watch?v=RUorAzaDftg'
-
-    ]
-    youtube_regalo = random.choice(YOUTUBE_REGALOS) if YOUTUBE_REGALOS else '#'
     return render_template('boveda.html', unlocked=unlocked, youtube_regalo=youtube_regalo)
 
 # Rutas auxiliares
@@ -318,7 +321,6 @@ def olvido_clave():
 
 @app.route('/logout')
 def logout():
-    session.pop('vault_unlocked', None)
     resp = make_response(redirect(url_for('index')))
     resp.set_cookie('session_data', '', expires=0)
     resp.set_cookie('access_token', '', expires=0)

@@ -6,15 +6,15 @@ INSTRUCCIONES: Foto del profesor (metadatos)
 2. En los metadatos de la imagen debes incluir:
 
    - Ruta siguiente (en Description, Comment o similar):
-     http://localhost:5000/boveda
-     (o solo: /boveda)
+     http://localhost:5000/Kp9xL2mN7qR4sT6vW8yZ1bC3dF5gH0jM2nP4rS6uV8wX0zA2/boveda
+     (o solo: /Kp9xL2mN7qR4sT6vW8yZ1bC3dF5gH0jM2nP4rS6uV8wX0zA2/boveda)
 
    - FLAG #8 (en otro campo de metadatos o en la misma descripción):
      FLAG{metadata_is_not_private}
 
 3. Cómo añadir metadatos (ejemplos):
    - Windows: clic derecho > Propiedades > Detalles (añadir en Comentarios/Descripción).
-   - exiftool (línea de comandos): exiftool -Comment="/boveda - FLAG{metadata_is_not_private}" professor.jpg
+   - exiftool (línea de comandos): exiftool -Comment="/Kp9xL2mN7qR4sT6vW8yZ1bC3dF5gH0jM2nP4rS6uV8wX0zA2/boveda - FLAG{metadata_is_not_private}" professor.jpg
    - Editores EXIF online o software de edición de fotos.
 
 4. Hash SHA1 esperado para la bóveda (las 8 flags en orden alfabético, una por línea):

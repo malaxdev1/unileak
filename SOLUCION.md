@@ -367,7 +367,7 @@ Obtener la última flag y la ruta a la bóveda desde los metadatos de la imagen 
 1. Tras eliminar la deuda, se redirige a `http://localhost:5000/el-secreto-del-profesor`.
 2. En esa página se muestra una foto del profesor (archivo que debes colocar en `static/uploads/professor.jpg`).
 3. En los metadatos de esa imagen debes incluir (para que el lab funcione):
-   - **Ruta siguiente:** `http://localhost:5000/boveda` (o solo `/boveda`)
+   - **Ruta siguiente:** `http://localhost:5000/Kp9xL2mN7qR4sT6vW8yZ1bC3dF5gH0jM2nP4rS6uV8wX0zA2/boveda` (o solo el path que aparezca en los metadatos)
    - **FLAG #8:** `FLAG{metadata_is_not_private}`
 4. El participante descarga la imagen, usa herramientas como `exiftool`, las propiedades del archivo en Windows, o visores EXIF online, y obtiene la ruta y la flag.
 
@@ -389,7 +389,7 @@ Comprobar que se recopilaron las 8 flags y cerrar el laboratorio con el hash SHA
 
 ### Solución
 
-1. Ir a `http://localhost:5000/boveda`.
+1. Ir a la URL indicada en los metadatos de la foto del profesor (path largo alfanumérico que termina en /boveda, p. ej. `http://localhost:5000/Kp9xL2mN7qR4sT6vW8yZ1bC3dF5gH0jM2nP4rS6uV8wX0zA2/boveda`).
 2. Listar las 8 flags en orden **alfabético** (una por línea).
 3. Calcular el SHA1 de ese texto (las 8 líneas concatenadas con salto de línea).
 4. Pegar el hash en el formulario (40 caracteres hexadecimales en minúsculas).
