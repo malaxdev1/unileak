@@ -33,9 +33,9 @@
                         <img src="{{ url_for('get_profile_image', filename='profile_card.png') }}" 
                              alt="Carnet Universitario" 
                              class="profile-image"
-                             title="Si tu foto se ve extraña, repórtala">
-                        <p class="profile-hint">Si tu foto se ve extraña, repórtala al sistema</p>
-                        <p><strong>ID:</strong> {{ user_id }}</p>
+                             title="Verifica que el carnet corresponda a tu usuario">
+                        <p class="profile-hint">Verifica que el nombre y el documento del carnet coincidan con tu usuario ({{ user_id }})</p>
+                        <p><strong>ID de sesión:</strong> {{ user_id }}</p>
                     </div>
                 </div>
 
@@ -57,7 +57,7 @@
                                 <td>{{ nota.materia }}</td>
                                 <td>{{ nota.nota }}</td>
                                 <td>
-                                    <span class="status-badge {{ 'status-warning' if nota.estado == 'Pendiente' else 'status-success' }}">
+                                    <span class="status-badge {% if nota.estado == 'Reprobado' %}status-danger{% elif nota.estado == 'Pendiente' %}status-warning{% else %}status-success{% endif %}">
                                         {{ nota.estado }}
                                     </span>
                                 </td>
