@@ -7,7 +7,7 @@ import hashlib
 import random
 from datetime import datetime
 
-# Cargar variables de entorno desde .env (solo en desarrollo local)
+# Carga variables de entorno desde .env (solo en desarrollo local)
 from dotenv import load_dotenv
 load_dotenv()
 
