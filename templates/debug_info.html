@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Debug Information - Sistema Interno</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <style>
+      .debug-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+      .debug-header {
+        background: #8b0000;
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+      }
+      .debug-header h1 {
+        margin: 0 0 10px 0;
+        font-size: 1.8rem;
+      }
+      .debug-warning {
+        background: #fff3cd;
+        border: 2px solid #ffc107;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 30px;
+        color: #856404;
+      }
+      .endpoint-section {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 25px;
+        margin-bottom: 25px;
+      }
+      .endpoint-title {
+        color: #8b0000;
+        font-size: 1.4rem;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .method-badge {
+        background: #28a745;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-size: 0.85rem;
+        font-weight: bold;
+      }
+      .endpoint-description {
+        color: #555;
+        margin-bottom: 20px;
+        font-size: 1.05rem;
+      }
+      .endpoint-url {
+        background: #e9ecef;
+        padding: 10px 15px;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        color: #495057;
+        margin-bottom: 20px;
+        font-size: 1rem;
+      }
+      .parameters-section {
+        margin-top: 20px;
+      }
+      .parameters-section h3 {
+        color: #495057;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+      }
+      .parameter-item {
+        background: white;
+        border-left: 4px solid #4a7ba7;
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+      }
+      .parameter-name {
+        font-weight: bold;
+        color: #4a7ba7;
+        font-family: "Courier New", monospace;
+        font-size: 1rem;
+      }
+      .parameter-type {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-left: 10px;
+      }
+      .parameter-description {
+        color: #555;
+        margin-top: 5px;
+        font-size: 0.95rem;
+      }
+      .panels-section {
+        margin-top: 40px;
+      }
+      .panel-item {
+        background: #e7f3ff;
+        border: 1px solid #b3d9ff;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+      }
+      .panel-item h3 {
+        color: #004085;
+        margin: 0 0 8px 0;
+        font-size: 1.1rem;
+      }
+      .panel-url {
+        font-family: "Courier New", monospace;
+        color: #004085;
+        font-size: 0.95rem;
+        margin-bottom: 5px;
+      }
+      .panel-description {
+        color: #555;
+        font-size: 0.95rem;
+      }
+      .flag-section {
+        background: #d4edda;
+        border: 2px solid #28a745;
+        padding: 15px;
+        border-radius: 6px;
+        margin-top: 30px;
+        text-align: center;
+      }
+      .flag-section strong {
+        color: #155724;
+        font-size: 1.1rem;
+      }
+      .examples-section {
+        margin-top: 25px;
+        padding-top: 20px;
+        border-top: 2px solid #dee2e6;
+      }
+      .examples-section h3 {
+        color: #495057;
+        font-size: 1.1rem;
+        margin-bottom: 15px;
+      }
+      .example-box {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+      .example-label {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+      }
+      .example-code {
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 12px;
+        border-radius: 4px;
+        font-family: "Courier New", monospace;
+        font-size: 0.9rem;
+        overflow-x: auto;
+        white-space: pre;
+        word-wrap: break-word;
+        position: relative;
+      }
+      .copy-button {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #4a7ba7;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-family: sans-serif;
+      }
+      .copy-button:hover {
+        background: #3d6a94;
+      }
+      .copy-button.copied {
+        background: #28a745;
+      }
+      .example-box {
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <div class="logo-section">
+          <div class="logo-placeholder">
+            <div class="logo-text">Universidad<br />de Mellín</div>
+          </div>
+        </div>
+        <div class="title-section">
+          <h1>DEBUG INFORMATION</h1>
+        </div>
+        <div class="info-corner">
+          <a
+            href="{{ url_for('index') }}"
+            style="color: white; text-decoration: none"
+            >Inicio</a
+          >
+        </div>
+      </header>
+      <div class="main-content">
+        <div class="debug-container">
+          <div class="debug-header">
+            <h1>Información del Sistema</h1>
+            <p style="margin: 0">Student ID: {{ student_id }}</p>
+            <p style="margin: 5px 0 0 0">Status: {{ status }}</p>
+          </div>
+
+          <div class="debug-warning">
+            <strong>⚠️ DEBUG MODE ENABLED</strong> - Información interna del
+            sistema
+          </div>
+
+          <h2 style="color: #8b0000; margin-bottom: 20px">
+            Endpoints Disponibles
+          </h2>
+
+          {% for endpoint_key, endpoint in endpoints.items() %}
+          <div class="endpoint-section">
+            <div class="endpoint-title">
+              <span class="method-badge">{{ endpoint.method }}</span>
+              {{ endpoint_key|replace('_', ' ')|title }}
+            </div>
+            <div class="endpoint-description">{{ endpoint.description }}</div>
+            <div class="endpoint-url">{{ endpoint.url }}</div>
+
+            <div class="parameters-section">
+              <h3>Parámetros:</h3>
+              {% for param_name, param_info in endpoint.parameters.items() %}
+              <div class="parameter-item">
+                <div>
+                  <span class="parameter-name">{{ param_name }}</span>
+                  <span class="parameter-type">({{ param_info.type }})</span>
+                  {% if param_info.required %}
+                  <span
+                    style="color: #dc3545; font-size: 0.85rem; margin-left: 8px"
+                    >* Requerido</span
+                  >
+                  {% endif %}
+                </div>
+                <div class="parameter-description">
+                  {{ param_info.description }}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+
+            {% if endpoint_key == 'grades_update' %}
+            <div class="examples-section">
+              <h3>Ejemplos de uso:</h3>
+
+              <div class="example-box">
+                <div class="example-label">Linux / macOS:</div>
+                <button class="copy-button" onclick="copyToClipboard('curl-linux', this)">Copiar</button>
+                <div class="example-code" id="curl-linux">curl -X POST https://unileak.vercel.app/api/grades/update \
+  -H "Content-Type: application/json" \
+  -d '{"student_id":"usuario123","subject":"Criptografía","grade":5.0}'</div>
+              </div>
+
+              <div class="example-box">
+                <div class="example-label">PowerShell (Windows):</div>
+                <button class="copy-button" onclick="copyToClipboard('curl-powershell', this)">Copiar</button>
+                <div class="example-code" id="curl-powershell">curl.exe -X POST https://unileak.vercel.app/api/grades/update -H "Content-Type: application/json" -d '{"student_id":"usuario123","subject":"Criptografía","grade":5.0}'</div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+
+          <div class="panels-section">
+            <h2 style="color: #8b0000; margin-bottom: 20px">
+              Paneles del Sistema
+            </h2>
+            {% for panel_key, panel_info in panels.items() %}
+            <div class="panel-item">
+              <h3>{{ panel_key|title }} Panel</h3>
+              <div class="panel-url">{{ panel_info.url }}</div>
+              <div class="panel-description">{{ panel_info.description }}</div>
+              <div
+                class="panel-description"
+                style="margin-top: 8px; color: #856404"
+              >
+                <strong>Acceso:</strong> {{ panel_info.access }}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          <div class="flag-section"><strong>FLAG:</strong> {{ flag }}</div>
+
+          <div
+            style="
+              margin-top: 30px;
+              padding: 15px;
+              background: #f8f9fa;
+              border-radius: 6px;
+              color: #6c757d;
+              font-size: 0.9rem;
+            "
+          >
+            {{ note }}
+          </div>
+        </div>
+      </div>
+      <footer class="footer">
+        <p>Universidad de Mellín - DarkWall Lab 2026</p>
+      </footer>
+    </div>
+    <script>
+      function copyToClipboard(elementId, buttonElement) {
+        const element = document.getElementById(elementId);
+        const text = element.textContent.trim();
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function() {
+            const originalText = buttonElement.textContent;
+            buttonElement.textContent = '¡Copiado!';
+            buttonElement.classList.add('copied');
+            
+            setTimeout(function() {
+              buttonElement.textContent = originalText;
+              buttonElement.classList.remove('copied');
+            }, 2000);
+          }).catch(function(err) {
+            console.error('Error al copiar:', err);
+            fallbackCopy(text, buttonElement);
+          });
+        } else {
+          fallbackCopy(text, buttonElement);
+        }
+      }
+      
+      function fallbackCopy(text, buttonElement) {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          const successful = document.execCommand('copy');
+          if (successful) {
+            const originalText = buttonElement.textContent;
+            buttonElement.textContent = '¡Copiado!';
+            buttonElement.classList.add('copied');
+            setTimeout(function() {
+              buttonElement.textContent = originalText;
+              buttonElement.classList.remove('copied');
+            }, 2000);
+          } else {
+            alert('No se pudo copiar. Por favor, selecciona y copia manualmente.');
+          }
+        } catch (err) {
+          console.error('Error en fallback:', err);
+          alert('Error al copiar. Por favor, selecciona y copia manualmente.');
+        }
+        
+        document.body.removeChild(textArea);
+      }
+    </script>
+  </body>
+</html>

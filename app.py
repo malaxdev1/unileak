@@ -283,16 +283,89 @@ def student_status():
     
     if debug == 'true':
         # FLAG{debug_mode_ruins_everything}
-        return jsonify({
-            'student_id': get_user_id(request) or '20261001',
-            'status': 'active',
-            'grade_endpoint': '/api/grades/update',
-            'financial_endpoint': '/api/finance/update',
-            'monitor_panel': '/monitor/revisions',
-            'academic_panel': '/academic/management',
-            'note': 'frontend validates role access',
-            'flag': 'FLAG{debug_mode_ruins_everything}'
-        })
+        endpoints_data = {
+            'grades_update': {
+                'url': '/api/grades/update',
+                'method': 'POST',
+                'description': 'Modifica las notas académicas de un estudiante',
+                'parameters': {
+                    'student_id': {
+                        'type': 'string',
+                        'required': True,
+                        'description': 'ID del estudiante (ej: "carlitos123")'
+                    },
+                    'subject': {
+                        'type': 'string',
+                        'required': True,
+                        'description': 'Nombre de la materia (ej: "Criptografía")'
+                    },
+                    'grade': {
+                        'type': 'number',
+                        'required': True,
+                        'description': 'Nueva nota (ej: 5.0)'
+                    }
+                }
+            },
+            'finance_update': {
+                'url': '/api/finance/update',
+                'method': 'POST',
+                'description': 'Actualiza el estado financiero (deuda) de un estudiante',
+                'parameters': {
+                    'student_id': {
+                        'type': 'string',
+                        'required': True,
+                        'description': 'ID del estudiante (ej: "carlitos123")'
+                    },
+                    'debt': {
+                        'type': 'number',
+                        'required': True,
+                        'description': 'Nuevo monto de deuda (ej: 0 para eliminar)'
+                    }
+                }
+            },
+            'academic_update': {
+                'url': '/api/academic/update',
+                'method': 'POST',
+                'description': 'Modifica el estado académico de una materia (ej: cambiar a "Aprobado")',
+                'parameters': {
+                    'student_id': {
+                        'type': 'string',
+                        'required': True,
+                        'description': 'ID del estudiante'
+                    },
+                    'subject': {
+                        'type': 'string',
+                        'required': True,
+                        'description': 'Nombre de la materia'
+                    },
+                    'status': {
+                        'type': 'string',
+                        'required': True,
+                        'description': 'Nuevo estado (ej: "Aprobado", "Reprobado", "Pendiente")'
+                    }
+                }
+            }
+        }
+        
+        panels_data = {
+            'monitor': {
+                'url': '/monitor/revisions',
+                'description': 'Panel de monitor - Revisión de solicitudes',
+                'access': 'Requiere cookie con role="monitor"'
+            },
+            'academic': {
+                'url': '/academic/management',
+                'description': 'Panel de coordinación académica',
+                'access': 'Requiere token Base64 con role="coordinator" y limited=false'
+            }
+        }
+        
+        return render_template('debug_info.html',
+                             student_id=get_user_id(request) or '20261001',
+                             status='active',
+                             endpoints=endpoints_data,
+                             panels=panels_data,
+                             flag='FLAG{debug_mode_ruins_everything}')
     else:
         return jsonify({'status': 'ok'})
 
