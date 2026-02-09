@@ -468,10 +468,13 @@ def update_academic():
     subject = data.get('subject')
     new_status = data.get('status')
     
-    # Obtener el usuario actual
+    # Obtener el usuario actual (cookie session_data)
     current_user_id = get_user_id(request)
     if not current_user_id:
-        return jsonify({'error': 'No autorizado'}), 401
+        return jsonify({
+            'error': 'No autorizado',
+            'message': 'No puedes hacer esta modificacion directamente. Revisa en el panel de monitor (/monitor/revisions) los requisitos para poder hacer este tipo de cambios.'
+        }), 401
     
     # Cargar notas del usuario desde KV
     if kv:
