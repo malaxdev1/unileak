@@ -603,7 +603,7 @@ def update_academic():
         'flag': 'FLAG{grades_are_not_sacred}'
     })
 
-# ACTO FINAL - Eliminación de deudas
+# ACTO FINAL - Eliminación de deudas (solo desde panel de coordinador, con sesión activa)
 @app.route('/api/finance/update', methods=['POST'])
 def update_finance():
     data = request.get_json()
@@ -613,8 +613,15 @@ def update_finance():
     if not student_id:
         return jsonify({'error': 'Falta student_id'}), 400
     
-    # Usar directamente el student_id del request (sin validación de autenticación)
-    # Actualizar deuda del usuario en KV
+    # Requiere sesión activa (solo desde el flujo: login + panel coordinador)
+    current_user_id = get_user_id(request)
+    if not current_user_id:
+        return jsonify({
+            'error': 'No autorizado',
+            'message': 'No puedes hacer esta modificacion directamente. Debes acceder al panel de coordinacion (/academic/management) con tu sesion activa y usar el boton Ajustar Deuda desde ahi.'
+        }), 401
+    
+    # Actualizar deuda del usuario en KV (coordinador puede ajustar cualquier estudiante desde el panel)
     if kv:
         user_deuda = get_user_data(student_id, 'deuda') or {}
         user_deuda['monto'] = str(new_debt)
